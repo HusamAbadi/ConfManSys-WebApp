@@ -10,6 +10,7 @@ import {
   doc,
   Timestamp,
 } from "firebase/firestore";
+import ImportButton from "../components/Shared/ImportButton";
 
 const KeywordsPage = () => {
   const { data: keywords, loading } = useFetchData("keywords");
@@ -115,10 +116,13 @@ const KeywordsPage = () => {
         />
         <button
           onClick={handleAddKeyword}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="bg-blue-500 text-white px-4 py-2 rounded w-full"
         >
           {editingKeywordId ? "Update Keyword" : "Add Keyword"}
         </button>
+
+        {/* Import Keywords */}
+        <ImportButton contentType={"keywords"} />
 
         {/* Search Keywords */}
         <div className="relative">

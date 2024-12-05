@@ -36,7 +36,7 @@ const ConferenceDetail = () => {
     presenters: [],
     isBreak: false,
   });
-  
+
   const [selectedDayId, setSelectedDayId] = useState(null);
   const [selectedSessionId, setSelectedSessionId] = useState(null);
   const [sessionsByDay, setSessionsByDay] = useState({});
@@ -97,7 +97,7 @@ const ConferenceDetail = () => {
           }));
         }
         setSessionsByDay(sessionsData);
-        console.log("sessons",sessionsData);
+        console.log("sessons", sessionsData);
       });
 
       return () => unsubscribe();
@@ -194,34 +194,40 @@ const ConferenceDetail = () => {
     }
   };
 
-const handleAddSession = async (dayId) => {
-  const dayDoc = doc(db, "conferences", id, "days", dayId);
-  const sessionsRef = collection(dayDoc, "sessions");
+  const handleAddSession = async (dayId) => {
+    const dayDoc = doc(db, "conferences", id, "days", dayId);
+    const sessionsRef = collection(dayDoc, "sessions");
+    const sessionsList = sessionsByDay[dayId]
 
-  try {
-    const newSession = { ...sessionData };
+    try {
+      const newSession = {
+        ...sessionData,
+        startTime: sessionData.startTime,
+        endTime: sessionData.endTime,
+      }
+      const isConflict = checkForConflicts(sessionsList, newSession)
 
-    await addDoc(sessionsRef, {
-      ...newSession,
-      startTime: sessionData.startTime,
-      endTime: sessionData.endTime,
-    });
-    setSessionData({
-      title: "",
-      startTime: null,
-      endTime: null,
-      description: "",
-      location: "",
-      chairPersons: [],
-      papers: [],
-      presenters: [],
-      isBreak: false,
-    });
-    setSelectedDayId(null);
-  } catch (err) {
-    console.error("Error adding session:", err);
-  }
-};
+      if (!isConflict) {
+        await addDoc(sessionsRef, {
+          ...newSession,
+        });
+        setSessionData({
+          title: "",
+          startTime: null,
+          endTime: null,
+          description: "",
+          location: "",
+          chairPersons: [],
+          papers: [],
+          presenters: [],
+          isBreak: false,
+        });
+        setSelectedDayId(null);
+      }
+    } catch (err) {
+      console.error("Error adding session:", err);
+    }
+  };
 
   const handleDeleteSession = async (dayId, sessionId) => {
     try {
@@ -273,6 +279,34 @@ const handleAddSession = async (dayId) => {
       console.error("Error editing session:", err);
     }
   };
+
+  function checkForConflicts(existingSessions, newSession) {
+    const newStartTime = newSession.startTime.seconds;
+    const newEndTime = newSession.endTime.seconds;
+    const newPresenters = new Set(newSession.presenters);
+
+    for (const session of existingSessions) {
+      const existingStartTime = session.startTime.seconds;
+      const existingEndTime = session.endTime.seconds;
+
+      // Check for time overlap
+      const isOverlapping =
+        (newStartTime < existingEndTime && newEndTime > existingStartTime);
+
+      if (isOverlapping) {
+        // Check for presenter overlap
+        for (const presenter of session.presenters) {
+          if (newPresenters.has(presenter)) {
+            alert(`Conflict Detected: Presenter ${presenter} is pre-occupied with another session at this time.`)
+            return true; // Conflict found
+          }
+        }
+      }
+    }
+
+    console.log('No conflict detected');
+    return false; // No conflicts
+  }
 
   // Filtered lists for persons and papers
   const filteredPersons = persons.filter((person) =>

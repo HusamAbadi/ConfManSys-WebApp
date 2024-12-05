@@ -10,6 +10,7 @@ import {
   updateDoc,
   Timestamp,
 } from "firebase/firestore";
+import ImportButton from "../components/Shared/ImportButton";
 
 const AuthorsPage = () => {
   const { data: authors, loading } = useFetchData("persons");
@@ -91,9 +92,9 @@ const AuthorsPage = () => {
     }
   };
 
-  const filteredAuthors = authors?.filter((author) =>
+  const filteredAuthors = authors?.filter((author) => {
     author.name.toLowerCase().includes(authorSearch.toLowerCase())
-  );
+  })
 
   return (
     <div className="bg-white p-6 shadow-md rounded-lg max-w-3xl mx-auto">
@@ -123,19 +124,21 @@ const AuthorsPage = () => {
           onClick={handleAddAuthor}
           disabled={isSubmitting}
           className={`bg-blue-500 text-white px-4 py-2 rounded w-full
-            ${
-              isSubmitting
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-blue-600"
+            ${isSubmitting
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-blue-600"
             }
           `}
         >
           {isSubmitting
             ? "Saving..."
             : editingAuthorId
-            ? "Update Author"
-            : "Add Author"}
+              ? "Update Author"
+              : "Add Author"}
         </button>
+
+        {/* Import Authors */}
+        <ImportButton contentType={"authors"} />
 
         {/* Search Authors */}
         <div className="relative">

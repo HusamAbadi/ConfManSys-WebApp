@@ -10,7 +10,16 @@ import {
   doc,
   Timestamp,
 } from "firebase/firestore";
+import {
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
+} from "../components/Shared/Tabs";
 import { Link } from "react-router-dom";
+import { FaCalendarAlt, FaListAlt } from "react-icons/fa";
+import BackgroundEventsCalendar from "../components/Conference/Calendar";
 
 const ConferencesPage = () => {
   const {
@@ -18,6 +27,7 @@ const ConferencesPage = () => {
     loading: conferencesLoading,
     error: conferencesError,
   } = useFetchData("conferences");
+  console.log(conferences)
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -191,8 +201,8 @@ const ConferencesPage = () => {
           {isSubmitting
             ? "Processing..."
             : editingConferenceId
-            ? "Update Conference"
-            : "Add Conference"}
+              ? "Update Conference"
+              : "Add Conference"}
         </button>
       </div>
       <input
@@ -202,11 +212,27 @@ const ConferencesPage = () => {
         onChange={(e) => setSearchQuery(e.target.value)}
         className="w-full border border-gray-300 p-3 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
       />
-      <ConferenceList
-        conferences={filteredConferences}
-        onEdit={handleEditConference}
-        onDelete={handleDeleteConference}
-      />
+
+
+      <Tabs>
+        <TabList>
+          <Tab><p className="flex gap-2 justify-center"><FaCalendarAlt /> Calendar</p></Tab>
+          <Tab><p className="flex gap-2 justify-center"><FaListAlt /> List</p></Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel>
+            <BackgroundEventsCalendar />
+          </TabPanel>
+          <TabPanel>
+            <ConferenceList
+              conferences={filteredConferences}
+              onEdit={handleEditConference}
+              onDelete={handleDeleteConference}
+            />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+
     </div>
   );
 };

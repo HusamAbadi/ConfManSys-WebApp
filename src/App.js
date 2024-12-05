@@ -13,6 +13,7 @@ import Navbar from "./components/Shared/Navbar";
 import PaperDetail from "./components/Paper/PaperDetail";
 import KeywordsPage from "./pages/KeywordsPage";
 import PasscodeEntry from "./components/PasscodeEntry";
+
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 

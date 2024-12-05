@@ -1,7 +1,7 @@
 // components/conference/DayCard.jsx
 import React from "react";
 import SessionList from "./SessionList";
-import { FiEdit, FiTrash2, FiPlus , FiX  } from "react-icons/fi";
+import { FiEdit, FiTrash2, FiPlus, FiX } from "react-icons/fi";
 const DayCard = ({
   day,
   sessionsByDay,
@@ -26,11 +26,22 @@ const DayCard = ({
         <div className="sm:flex sm:items-center sm:justify-between">
           <div>
             <h3 className="text-lg font-semibold text-gray-900">
-              {startDate ? startDate.toDateString() : "Date not available"}
+              {startDate ? startDate.toLocaleDateString(navigator.language, {
+                weekday: 'short',  // Short form of the weekday
+                month: 'short',    // Short form of the month
+                day: '2-digit',     // Two-digit day
+                year: '2-digit'
+              }) : "Date not available"}
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              {startDate ? startDate.toLocaleTimeString() : "--:--"} -{" "}
-              {endDate ? endDate.toLocaleTimeString() : "--:--"}
+              {startDate ? startDate.toLocaleTimeString(navigator.language, {
+                hour: '2-digit',
+                minute: '2-digit'
+              }) : "--:--"} -{" "}
+              {endDate ? endDate.toLocaleTimeString(navigator.language, {
+                hour: '2-digit',
+                minute: '2-digit'
+              }) : "--:--"}
             </p>
           </div>
           <div className="mt-4 sm:mt-0 flex space-x-2">
@@ -76,20 +87,19 @@ const DayCard = ({
               });
               setEditSessionId(null);
             }}
-            className={`inline-flex items-center px-4 py-2 rounded-md text-white ${
-              selectedDayId === day.id
-                ? "bg-gray-600 hover:bg-gray-700"
-                : "bg-blue-600 hover:bg-blue-700"
-            } transition-colors`}
+            className={`inline-flex items-center px-4 py-2 rounded-md text-white ${selectedDayId === day.id
+              ? "bg-gray-600 hover:bg-gray-700"
+              : "bg-blue-600 hover:bg-blue-700"
+              } transition-colors`}
           >
             {selectedDayId === day.id ? (
               <>
-                <FiX  className="h-4 w-4 mr-1.5" />
+                <FiX className="h-4 w-4 mr-1.5" />
                 Cancel
               </>
             ) : (
               <>
-                <FiPlus  className="h-4 w-4 mr-1.5" />
+                <FiPlus className="h-4 w-4 mr-1.5" />
                 Add Session
               </>
             )}

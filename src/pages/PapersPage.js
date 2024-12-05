@@ -13,6 +13,7 @@ import {
   Timestamp,
   arrayUnion,
 } from "firebase/firestore";
+import ImportButton from "../components/Shared/ImportButton";
 
 const PaperPage = () => {
   const {
@@ -327,19 +328,19 @@ const PaperPage = () => {
           onClick={handleAddOrUpdatePaper}
           disabled={isSubmitting}
           className={`bg-blue-500 text-white px-4 py-2 rounded w-full
-            ${
-              isSubmitting
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-blue-600"
+            ${isSubmitting
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-blue-600"
             }
           `}
         >
           {isSubmitting
             ? "Processing..."
             : editingPaperId
-            ? "Update Paper"
-            : "Add Paper"}
+              ? "Update Paper"
+              : "Add Paper"}
         </button>
+        <ImportButton contentType={"papers"} />
       </div>
 
       <input
@@ -349,6 +350,7 @@ const PaperPage = () => {
         onChange={(e) => setSearchQuery(e.target.value)}
         className="w-full border border-gray-300 p-2 rounded mb-4"
       />
+
 
       {/* Display filtered papers with edit and delete options */}
       <PaperList
