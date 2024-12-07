@@ -9,43 +9,67 @@ const SessionList = ({
   handleDeleteSession,
   setEditSessionId,
   setSelectedDayId,
-  setSessionData
+  setSessionData,
+  persons,
 }) => {
+  const getPersonName = (personId) => {
+    const person = persons.find(p => p.id === personId);
+    return person ? person.name : personId;
+  };
+
   return (
     <div className="space-y-4">
       {sessions.length > 0 ? (
         sessions.map((session) => (
           <div
             key={session.id}
-            className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors"
+            className={`rounded-lg p-4 transition-all ${
+              session.isBreak
+                ? 'bg-green-50 hover:bg-gray-100 border-l-4 border-gray-400'
+                : 'bg-blue-50 hover:bg-gray-100 border border-b-4 border-gray-400 shadow-sm hover:border-blue-200'
+            }`}
           >
             <div className="sm:flex sm:items-center sm:justify-between">
-              <div>
-                <h5 className="text-base font-semibold text-gray-900">
+              <div className="flex-grow">
+                <h5 className={`text-base font-semibold ${
+                  session.isBreak ? 'text-gray-600' : 'text-gray-900'
+                }`}>
                   {session.title}
                 </h5>
-                <div className="mt-1 space-y-1">
-                  <p className="text-sm text-gray-500">
+                <div className="mt-2 space-y-2">
+                  <p className={`text-sm ${
+                    session.isBreak ? 'text-gray-500' : 'text-blue-600 font-medium'
+                  }`}>
                     <FiClock className="inline-block h-4 w-4 mr-1.5 -mt-0.5" />
                     {session.startTime
                       ? epochToTime(session.startTime.seconds)
                       : "--:--"}{" "}
                     -{" "}
                     {session.endTime
-                      ? epochToTime(session.startTime.seconds)
+                      ? epochToTime(session.endTime.seconds)
                       : "--:--"}
                   </p>
                   {session.description && (
-                    <p className="text-sm text-gray-600">
+                    <p className={`text-sm ${
+                      session.isBreak ? 'text-gray-500' : 'text-gray-600'
+                    }`}>
                       {session.description}
                     </p>
                   )}
-                  {session.location && (
-                    <p className="text-sm text-gray-500">
+                  {session.location && !session.isBreak &&(
+                    <p className={`text-sm ${
+                      session.isBreak ? 'text-gray-500' : 'text-gray-600'
+                    }`}>
                       <FiMapPin className="inline-block h-4 w-4 mr-1.5 -mt-0.5" />
                       {session.location}
                     </p>
                   )}
+                  {!session.isBreak && session.chairPersons && session.chairPersons.length > 0 && (
+                    <p className="text-sm text-gray-600">
+                      Chair: {session.chairPersons.map(id => getPersonName(id)).join(', ')}
+                    </p>
+                  )}
+                  
                 </div>
               </div>
               <div className="mt-4 sm:mt-0 flex space-x-2">

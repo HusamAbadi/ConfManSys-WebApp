@@ -349,7 +349,7 @@ const ConferenceDetail = () => {
                 {epochToDate(conference.endDate.seconds)}{" "}
               </p>
             </div>
-          </div>
+        </div>
         </div>
 
         {/* Main Content */}
@@ -379,6 +379,7 @@ const ConferenceDetail = () => {
                   handleDeleteSession={handleDeleteSession}
                   setEditSessionId={setEditSessionId}
                   setSessionData={setSessionData}
+                  persons={persons}
                 />
 
                 {selectedDayId === day.id && (

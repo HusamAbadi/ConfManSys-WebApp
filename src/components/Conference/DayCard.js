@@ -2,6 +2,7 @@
 import React from "react";
 import SessionList from "./SessionList";
 import { FiEdit, FiTrash2, FiPlus, FiX } from "react-icons/fi";
+
 const DayCard = ({
   day,
   sessionsByDay,
@@ -14,6 +15,7 @@ const DayCard = ({
   handleDeleteSession,
   setEditSessionId,
   setSessionData,
+  persons,
 }) => {
   const startDate = day.startDate
     ? new Date(day.startDate.seconds * 1000)
@@ -21,19 +23,19 @@ const DayCard = ({
   const endDate = day.endDate ? new Date(day.endDate.seconds * 1000) : null;
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="px-6 py-4 bg-gray-50 border-b">
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-gray-100 hover:border-blue-100 transition-all mb-8">
+      <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-white border-b border-blue-100">
         <div className="sm:flex sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-2xl font-bold text-blue-900">
               {startDate ? startDate.toLocaleDateString(navigator.language, {
-                weekday: 'short',  // Short form of the weekday
-                month: 'short',    // Short form of the month
-                day: '2-digit',     // Two-digit day
+                weekday: 'long',  // Full weekday name
+                month: 'short',    
+                day: '2-digit',    
                 year: '2-digit'
               }) : "Date not available"}
             </h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-2 text-md text-blue-600 font-medium">
               {startDate ? startDate.toLocaleTimeString(navigator.language, {
                 hour: '2-digit',
                 minute: '2-digit'
@@ -44,7 +46,7 @@ const DayCard = ({
               }) : "--:--"}
             </p>
           </div>
-          <div className="mt-4 sm:mt-0 flex space-x-2">
+          <div className="mt-4 sm:mt-0 flex space-x-3">
             <button
               onClick={() => {
                 setEditDayId(day.id);
@@ -113,6 +115,7 @@ const DayCard = ({
           setEditSessionId={setEditSessionId}
           setSelectedDayId={setSelectedDayId}
           setSessionData={setSessionData}
+          persons={persons}
         />
       </div>
     </div>
