@@ -147,7 +147,7 @@ const ConferencesPage = () => {
 
   return (
     <div className="bg-gray-50 p-8 shadow-md rounded-lg max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Conferences</h1>
+      <h1 className="text-3xl font-bold mb-6">Create a Conference</h1>
       {successMessage && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
           {successMessage}
@@ -216,19 +216,19 @@ const ConferencesPage = () => {
 
       <Tabs>
         <TabList>
-          <Tab><p className="flex gap-2 justify-center"><FaCalendarAlt /> Calendar</p></Tab>
           <Tab><p className="flex gap-2 justify-center"><FaListAlt /> List</p></Tab>
+          <Tab><p className="flex gap-2 justify-center"><FaCalendarAlt /> Calendar</p></Tab>
         </TabList>
         <TabPanels>
-          <TabPanel>
-            <BackgroundEventsCalendar />
-          </TabPanel>
           <TabPanel>
             <ConferenceList
               conferences={filteredConferences}
               onEdit={handleEditConference}
               onDelete={handleDeleteConference}
             />
+          </TabPanel>
+          <TabPanel>
+            <BackgroundEventsCalendar />
           </TabPanel>
         </TabPanels>
       </Tabs>

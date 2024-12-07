@@ -266,12 +266,12 @@ const extractPaperData = (paper) => {
   const abstract = paper.querySelector('Abstract').textContent;
   const keywords = Array.from(paper.querySelectorAll('Keyword')).map((keyword) => keyword.textContent);
   const publicationDate = paper.querySelector('PublicationDate').textContent;
-  const journal = {
-    Name: paper.querySelector('Journal > Name').textContent,
-    Volume: paper.querySelector('Journal > Volume').textContent,
-    Issue: paper.querySelector('Journal > Issue').textContent,
-    Pages: paper.querySelector('Journal > Pages').textContent,
-  };
+  // const journal = {
+  //   Name: paper.querySelector('Journal > Name').textContent,
+  //   Volume: paper.querySelector('Journal > Volume').textContent,
+  //   Issue: paper.querySelector('Journal > Issue').textContent,
+  //   Pages: paper.querySelector('Journal > Pages').textContent,
+  // };
   const doi = paper.querySelector('DOI').textContent;
 
   return {
@@ -280,7 +280,7 @@ const extractPaperData = (paper) => {
     Abstract: abstract,
     Keywords: keywords,
     PublicationDate: publicationDate,
-    Journal: journal,
+    // Journal: journal,
     DOI: doi,
   };
 };

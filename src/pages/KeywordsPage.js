@@ -9,6 +9,7 @@ import {
   updateDoc,
   doc,
   Timestamp,
+  writeBatch,
 } from "firebase/firestore";
 import ImportButton from "../components/Shared/ImportButton";
 
@@ -83,6 +84,35 @@ const KeywordsPage = () => {
     } catch (error) {
       console.error("Error deleting keyword:", error);
       setSubmitError(error.message);
+    }
+  };
+
+  const handleDeleteAllKeywords = async () => {
+    // Confirm before deleting all keywords
+    const confirmDelete = window.confirm("Are you sure you want to delete ALL keywords? This action cannot be undone.");
+    
+    if (!confirmDelete) return;
+
+    setSubmitError(null);
+    setSuccessMessage("");
+
+    try {
+      // Batch delete all keywords
+      const batch = writeBatch(db);
+      keywords.forEach((keyword) => {
+        const keywordRef = doc(db, "keywords", keyword.id);
+        batch.delete(keywordRef);
+      });
+
+      await batch.commit();
+      setSuccessMessage(`Successfully deleted ${keywords.length} keywords.`);
+      
+      // Reset form
+      setNewKeyword("");
+      setEditingKeywordId(null);
+    } catch (error) {
+      console.error("Error deleting all keywords:", error);
+      setSubmitError("Failed to delete all keywords. " + error.message);
     }
   };
 
@@ -163,6 +193,12 @@ const KeywordsPage = () => {
             </ul>
           )}
         </div>
+        <button
+          onClick={handleDeleteAllKeywords}
+          className="bg-red-500 text-white px-4 py-2 rounded w-full"
+        >
+          Delete All Keywords
+        </button>
       </div>
       {loading ? (
         <p>Loading...</p>

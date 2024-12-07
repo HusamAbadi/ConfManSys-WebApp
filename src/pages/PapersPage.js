@@ -12,6 +12,7 @@ import {
   doc,
   Timestamp,
   arrayUnion,
+  writeBatch,
 } from "firebase/firestore";
 import ImportButton from "../components/Shared/ImportButton";
 
@@ -171,6 +172,39 @@ const PaperPage = () => {
     setAuthorSearch("");
     setKeywordSearch("");
     setEditingPaperId(null);
+  };
+
+  const handleDeleteAllPapers = async () => {
+    // Confirm before deleting all papers
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete ALL papers? This action cannot be undone."
+    );
+
+    if (!confirmDelete) return;
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+    setSuccessMessage("");
+
+    try {
+      // Batch delete all papers
+      const batch = writeBatch(db);
+      papers.forEach((paper) => {
+        const paperRef = doc(db, "papers", paper.id);
+        batch.delete(paperRef);
+      });
+
+      await batch.commit();
+      setSuccessMessage(`Successfully deleted ${papers.length} papers.`);
+
+      // Optional: Clear form and reset state
+      resetForm();
+    } catch (error) {
+      console.error("Error deleting all papers:", error);
+      setSubmitError("Failed to delete all papers. " + error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (papersLoading || authorsLoading || keywordsLoading)
@@ -340,6 +374,18 @@ const PaperPage = () => {
               ? "Update Paper"
               : "Add Paper"}
         </button>
+        <button
+          onClick={handleDeleteAllPapers}
+          disabled={isSubmitting}
+          className={`bg-red-500 text-white px-4 py-2 rounded w-full
+            ${isSubmitting
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-red-600"
+            }
+          `}
+        >
+          Delete All Papers
+        </button>
         <ImportButton contentType={"papers"} />
       </div>
 
@@ -350,7 +396,6 @@ const PaperPage = () => {
         onChange={(e) => setSearchQuery(e.target.value)}
         className="w-full border border-gray-300 p-2 rounded mb-4"
       />
-
 
       {/* Display filtered papers with edit and delete options */}
       <PaperList

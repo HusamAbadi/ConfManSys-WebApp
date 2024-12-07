@@ -9,6 +9,7 @@ import {
   deleteDoc,
   updateDoc,
   Timestamp,
+  writeBatch,
 } from "firebase/firestore";
 import ImportButton from "../components/Shared/ImportButton";
 
@@ -89,6 +90,38 @@ const AuthorsPage = () => {
     } catch (error) {
       console.error("Error deleting author:", error);
       setSubmitError(error.message);
+    }
+  };
+
+  const handleDeleteAllAuthors = async () => {
+    // Confirm before deleting all authors
+    const confirmDelete = window.confirm("Are you sure you want to delete ALL authors? This action cannot be undone.");
+    
+    if (!confirmDelete) return;
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+    setSuccessMessage("");
+
+    try {
+      // Batch delete all authors
+      const batch = writeBatch(db);
+      authors.forEach((author) => {
+        const authorRef = doc(db, "persons", author.id);
+        batch.delete(authorRef);
+      });
+
+      await batch.commit();
+      setSuccessMessage(`Successfully deleted ${authors.length} authors.`);
+      
+      // Reset form
+      setNewAuthorName("");
+      setEditingAuthorId(null);
+    } catch (error) {
+      console.error("Error deleting all authors:", error);
+      setSubmitError("Failed to delete all authors. " + error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -175,6 +208,13 @@ const AuthorsPage = () => {
             </ul>
           )}
         </div>
+
+        <button
+          onClick={handleDeleteAllAuthors}
+          className="bg-red-500 text-white px-4 py-2 rounded w-full hover:bg-red-600"
+        >
+          Delete All Authors
+        </button>
       </div>
 
       {loading ? (
