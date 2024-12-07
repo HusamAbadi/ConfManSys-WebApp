@@ -18,6 +18,7 @@ import DayCard from "./DayCard";
 import SessionForm from "./SessionForm";
 import { FiMapPin, FiCalendar } from "react-icons/fi";
 import { epochToDate } from "../../utils/epochConverter";
+
 const ConferenceDetail = () => {
   const { id } = useParams();
   const [conference, setConference] = useState(null);
@@ -74,15 +75,15 @@ const ConferenceDetail = () => {
       const daysRef = collection(db, "conferences", id, "days");
       const q = query(daysRef);
       const unsubscribe = onSnapshot(q, async (snapshot) => {
-        const fetchedDays = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const fetchedDays = snapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .sort((a, b) => a.startDate.seconds - b.startDate.seconds);
 
         setDays(fetchedDays);
         console.log("dats:", fetchedDays);
-        // console.log("day:", new Date(conference["days"][0].startDate).toDateString());
-        // console.log("conf:", new Date(days[0].startDate.seconds * 1000).toLocaleString());
 
         // Fetch sessions for each day
         const sessionsData = {};
@@ -92,10 +93,12 @@ const ConferenceDetail = () => {
             "sessions"
           );
           const sessionsSnapshot = await getDocs(sessionsRef);
-          sessionsData[day.id] = sessionsSnapshot.docs.map((sessionDoc) => ({
-            id: sessionDoc.id,
-            ...sessionDoc.data(),
-          }));
+          sessionsData[day.id] = sessionsSnapshot.docs
+            .map((sessionDoc) => ({
+              id: sessionDoc.id,
+              ...sessionDoc.data(),
+            }))
+            .sort((a, b) => a.startTime.seconds - b.startTime.seconds);
         }
         setSessionsByDay(sessionsData);
         console.log("sessons", sessionsData);

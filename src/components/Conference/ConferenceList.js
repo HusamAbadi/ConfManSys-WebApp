@@ -7,7 +7,9 @@ const ConferenceList = ({ conferences, onEdit, onDelete }) => {
     <div className="max-w-4xl mx-auto p-6">
       <h2 className="text-3xl font-bold text-gray-800 mb-6">Conferences</h2>
       <ul className="space-y-3 mb-8">
-        {conferences.map((conference) => (
+        {[...conferences]
+          .sort((a, b) => a.startDate.seconds - b.startDate.seconds)
+          .map((conference) => (
           <li
             key={conference.id}
             className="hover:bg-gray-50 rounded-lg transition-colors shadow"
