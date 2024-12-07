@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { epochToDate } from "../../utils/epochConverter";
 
 const ConferenceList = ({ conferences, onEdit, onDelete }) => {
   return (
@@ -12,12 +13,15 @@ const ConferenceList = ({ conferences, onEdit, onDelete }) => {
             className="hover:bg-gray-50 rounded-lg transition-colors shadow"
           >
             <div className="flex justify-between items-center p-4 border-b border-gray-200">
-              <Link
-                to={`/conferences/${conference.id}`}
-                className="block text-blue-600 hover:text-blue-800 font-medium"
-              >
-                {conference.name}
-              </Link>
+              <div>
+                <Link
+                  to={`/conferences/${conference.id}`}
+                  className="block text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  {conference.name}
+                </Link>
+                <span>{epochToDate(conference.startDate.seconds)} - {epochToDate(conference.endDate.seconds)} </span>
+              </div>
               <div>
                 <button
                   onClick={() => onEdit(conference)}

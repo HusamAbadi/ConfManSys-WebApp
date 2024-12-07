@@ -1,6 +1,7 @@
 // components/conference/SessionList.jsx
 import React from "react";
 import { FiClock, FiMapPin, FiEdit, FiTrash2, FiPlus, FiX } from "react-icons/fi";
+import { epochToTime } from "../../utils/epochConverter";
 
 const SessionList = ({
   dayId,
@@ -27,17 +28,11 @@ const SessionList = ({
                   <p className="text-sm text-gray-500">
                     <FiClock className="inline-block h-4 w-4 mr-1.5 -mt-0.5" />
                     {session.startTime
-                      ? new Date(session.startTime.seconds * 1000).toLocaleTimeString(navigator.language, {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })
+                      ? epochToTime(session.startTime.seconds)
                       : "--:--"}{" "}
                     -{" "}
                     {session.endTime
-                      ? new Date(session.endTime.seconds * 1000).toLocaleTimeString(navigator.language, {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })
+                      ? epochToTime(session.startTime.seconds)
                       : "--:--"}
                   </p>
                   {session.description && (

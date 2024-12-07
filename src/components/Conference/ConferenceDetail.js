@@ -17,6 +17,7 @@ import DayForm from "./DayFrom";
 import DayCard from "./DayCard";
 import SessionForm from "./SessionForm";
 import { FiMapPin, FiCalendar } from "react-icons/fi";
+import { epochToDate } from "../../utils/epochConverter";
 const ConferenceDetail = () => {
   const { id } = useParams();
   const [conference, setConference] = useState(null);
@@ -330,7 +331,7 @@ const ConferenceDetail = () => {
             {conference.name}
           </h1>
           <p className="text-blue-100 mb-4">{conference.description}</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-white">
+          <div className="flex justify-between gap-4 text-white">
             <div>
               <p className="flex items-center">
                 <FiMapPin className="h-5 w-5 mr-2" />
@@ -338,15 +339,11 @@ const ConferenceDetail = () => {
               </p>
             </div>
             <div>
-              <p className="flex items-center">
+              <p className="flex items-center gap-3">
                 <FiCalendar className="h-5 w-5 mr-2" />
-                {new Date(
-                  conference.startDate.seconds * 1000
-                ).toLocaleDateString()}{" "}
-                -
-                {new Date(
-                  conference.endDate.seconds * 1000
-                ).toLocaleDateString()}
+                {epochToDate(conference.startDate.seconds)}{" "}
+                <span> - </span>
+                {epochToDate(conference.endDate.seconds)}{" "}
               </p>
             </div>
           </div>
