@@ -1,7 +1,6 @@
-// components/conference/DayCard.jsx
-import React from "react";
-import SessionList from "./SessionList";
-import { FiEdit, FiTrash2, FiPlus, FiX } from "react-icons/fi";
+import React from 'react';
+import SessionList from './SessionList';
+import { FiEdit, FiTrash2, FiPlus, FiX } from 'react-icons/fi';
 
 const DayCard = ({
   day,
@@ -16,6 +15,7 @@ const DayCard = ({
   setEditSessionId,
   setSessionData,
   persons,
+  openModal,
 }) => {
   const startDate = day.startDate
     ? new Date(day.startDate.seconds * 1000)
@@ -28,22 +28,29 @@ const DayCard = ({
         <div className="sm:flex sm:items-center sm:justify-between">
           <div>
             <h3 className="text-2xl font-bold text-blue-900">
-              {startDate ? startDate.toLocaleDateString(navigator.language, {
-                weekday: 'long',  // Full weekday name
-                month: 'short',    
-                day: '2-digit',    
-                year: '2-digit'
-              }) : "Date not available"}
+              {startDate
+                ? startDate.toLocaleDateString(navigator.language, {
+                    weekday: 'long',
+                    month: 'short',
+                    day: '2-digit',
+                    year: '2-digit',
+                  })
+                : 'Date not available'}
             </h3>
             <p className="mt-2 text-md text-blue-600 font-medium">
-              {startDate ? startDate.toLocaleTimeString(navigator.language, {
-                hour: '2-digit',
-                minute: '2-digit'
-              }) : "--:--"} -{" "}
-              {endDate ? endDate.toLocaleTimeString(navigator.language, {
-                hour: '2-digit',
-                minute: '2-digit'
-              }) : "--:--"}
+              {startDate
+                ? startDate.toLocaleTimeString(navigator.language, {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                : '--:--'}{' '}
+              -{' '}
+              {endDate
+                ? endDate.toLocaleTimeString(navigator.language, {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                : '--:--'}
             </p>
           </div>
           <div className="mt-4 sm:mt-0 flex space-x-3">
@@ -74,25 +81,26 @@ const DayCard = ({
       <div className="px-6 py-4">
         <div className="flex justify-between items-center mb-4">
           <h4 className="text-lg font-medium text-gray-900">Sessions</h4>
-          <button
+          {/* <button
             onClick={() => {
               setSelectedDayId(selectedDayId === day.id ? null : day.id);
               setSessionData({
-                title: "",
-                startTime: "",
-                endTime: "",
-                description: "",
-                location: "",
+                title: '',
+                startTime: '',
+                endTime: '',
+                description: '',
+                location: '',
                 chairPersons: [],
                 papers: [],
                 presenters: [],
               });
               setEditSessionId(null);
             }}
-            className={`inline-flex items-center px-4 py-2 rounded-md text-white ${selectedDayId === day.id
-              ? "bg-gray-600 hover:bg-gray-700"
-              : "bg-blue-600 hover:bg-blue-700"
-              } transition-colors`}
+            className={`inline-flex items-center px-4 py-2 rounded-md text-white ${
+              selectedDayId === day.id
+                ? 'bg-gray-600 hover:bg-gray-700'
+                : 'bg-blue-600 hover:bg-blue-700'
+            } transition-colors`}
           >
             {selectedDayId === day.id ? (
               <>
@@ -105,6 +113,15 @@ const DayCard = ({
                 Add Session
               </>
             )}
+          </button> */}
+          <button
+            onClick={() => {
+              openModal(); // Open modal
+              setSelectedDayId(day.id); // Optional: Pre-select the day
+            }}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Add Session
           </button>
         </div>
 

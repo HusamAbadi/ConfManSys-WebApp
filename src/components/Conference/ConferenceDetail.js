@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   doc,
   getDoc,
@@ -11,13 +11,13 @@ import {
   updateDoc,
   deleteDoc,
   Timestamp,
-} from "firebase/firestore";
-import { db } from "../../firebase/config";
-import DayForm from "./DayFrom";
-import DayCard from "./DayCard";
-import SessionForm from "./SessionForm";
-import { FiMapPin, FiCalendar } from "react-icons/fi";
-import { epochToDate } from "../../utils/epochConverter";
+} from 'firebase/firestore';
+import { db } from '../../firebase/config';
+import DayForm from './DayFrom';
+import DayCard from './DayCard';
+import SessionForm from './SessionForm';
+import { FiMapPin, FiCalendar } from 'react-icons/fi';
+import { epochToDate } from '../../utils/epochConverter';
 
 const ConferenceDetail = () => {
   const { id } = useParams();
@@ -25,14 +25,14 @@ const ConferenceDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [days, setDays] = useState([]);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [sessionData, setSessionData] = useState({
-    title: "",
+    title: '',
     startTime: null,
     endTime: null,
-    description: "",
-    location: "",
+    description: '',
+    location: '',
     chairPersons: [],
     papers: [],
     presenters: [],
@@ -44,20 +44,39 @@ const ConferenceDetail = () => {
   const [sessionsByDay, setSessionsByDay] = useState({});
   const [persons, setPersons] = useState([]);
   const [papers, setPapers] = useState([]);
-  const [personSearch, setPersonSearch] = useState("");
-  const [paperSearch, setPaperSearch] = useState("");
+  const [personSearch, setPersonSearch] = useState('');
+  const [paperSearch, setPaperSearch] = useState('');
   const [editDayId, setEditDayId] = useState(null);
   const [editSessionId, setEditSessionId] = useState(null);
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const openModal = () => setIsModalVisible(true);
+  const closeModal = () => {
+    setIsModalVisible(false);
+    setEditSessionId(null);
+    setSessionData({
+      title: '',
+      startTime: null,
+      endTime: null,
+      description: '',
+      location: '',
+      chairPersons: [],
+      papers: [],
+      presenters: [],
+      isBreak: false,
+    });
+  };
 
   useEffect(() => {
     const fetchConference = async () => {
       try {
-        const docRef = doc(db, "conferences", id);
+        const docRef = doc(db, 'conferences', id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setConference({ id: docSnap.id, ...docSnap.data() });
         } else {
-          setError("Conference not found");
+          setError('Conference not found');
         }
       } catch (err) {
         setError(err.message);
@@ -71,8 +90,8 @@ const ConferenceDetail = () => {
 
   useEffect(() => {
     if (conference) {
-      console.log("Conference:", conference);
-      const daysRef = collection(db, "conferences", id, "days");
+      console.log('Conference:', conference);
+      const daysRef = collection(db, 'conferences', id, 'days');
       const q = query(daysRef);
       const unsubscribe = onSnapshot(q, async (snapshot) => {
         const fetchedDays = snapshot.docs
@@ -83,14 +102,14 @@ const ConferenceDetail = () => {
           .sort((a, b) => a.startDate.seconds - b.startDate.seconds);
 
         setDays(fetchedDays);
-        console.log("dats:", fetchedDays);
+        console.log('dats:', fetchedDays);
 
         // Fetch sessions for each day
         const sessionsData = {};
         for (const day of fetchedDays) {
           const sessionsRef = collection(
-            doc(db, "conferences", id, "days", day.id),
-            "sessions"
+            doc(db, 'conferences', id, 'days', day.id),
+            'sessions'
           );
           const sessionsSnapshot = await getDocs(sessionsRef);
           sessionsData[day.id] = sessionsSnapshot.docs
@@ -101,7 +120,7 @@ const ConferenceDetail = () => {
             .sort((a, b) => a.startTime.seconds - b.startTime.seconds);
         }
         setSessionsByDay(sessionsData);
-        console.log("sessons", sessionsData);
+        console.log('sessons', sessionsData);
       });
 
       return () => unsubscribe();
@@ -110,7 +129,7 @@ const ConferenceDetail = () => {
 
   useEffect(() => {
     const fetchPersons = async () => {
-      const personsRef = collection(db, "persons");
+      const personsRef = collection(db, 'persons');
       const personsSnapshot = await getDocs(personsRef);
       const personsList = personsSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -120,7 +139,7 @@ const ConferenceDetail = () => {
     };
 
     const fetchPapers = async () => {
-      const papersRef = collection(db, "papers");
+      const papersRef = collection(db, 'papers');
       const papersSnapshot = await getDocs(papersRef);
       const papersList = papersSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -135,12 +154,12 @@ const ConferenceDetail = () => {
 
   const handleAddDay = async () => {
     if (new Date(startDate) >= new Date(endDate)) {
-      alert("End date must be after the start date.");
+      alert('End date must be after the start date.');
       return;
     }
 
     try {
-      const daysRef = collection(db, "conferences", id, "days");
+      const daysRef = collection(db, 'conferences', id, 'days');
       const newDay = {
         startDate: Timestamp.fromDate(new Date(startDate)),
         endDate: Timestamp.fromDate(new Date(endDate)),
@@ -150,14 +169,14 @@ const ConferenceDetail = () => {
       setStartDate(null);
       setEndDate(null);
     } catch (err) {
-      console.error("Error adding day:", err);
+      console.error('Error adding day:', err);
     }
   };
 
   const handleEditDay = async (dayId) => {
     // Ensure both start and end datetime inputs are provided
     if (!startDate || !endDate) {
-      alert("Please provide both start and end dates with times.");
+      alert('Please provide both start and end dates with times.');
       return;
     }
 
@@ -166,13 +185,13 @@ const ConferenceDetail = () => {
 
     // Check if the start date and time is before the end date and time
     if (fullStartDate >= fullEndDate) {
-      alert("Start date and time must be before end date and time.");
+      alert('Start date and time must be before end date and time.');
       return;
     }
 
     try {
       // Reference to the specific day document in the database
-      const dayDoc = doc(db, "conferences", id, "days", dayId);
+      const dayDoc = doc(db, 'conferences', id, 'days', dayId);
 
       // Update the day document with the new start and end dates
       await updateDoc(dayDoc, {
@@ -185,42 +204,42 @@ const ConferenceDetail = () => {
       setStartDate(null);
       setEndDate(null);
     } catch (err) {
-      console.error("Error editing day:", err);
+      console.error('Error editing day:', err);
     }
   };
 
   const handleDeleteDay = async (dayId) => {
     try {
-      const dayDoc = doc(db, "conferences", id, "days", dayId);
+      const dayDoc = doc(db, 'conferences', id, 'days', dayId);
       await deleteDoc(dayDoc);
     } catch (err) {
-      console.error("Error deleting day:", err);
+      console.error('Error deleting day:', err);
     }
   };
 
   const handleAddSession = async (dayId) => {
-    const dayDoc = doc(db, "conferences", id, "days", dayId);
-    const sessionsRef = collection(dayDoc, "sessions");
-    const sessionsList = sessionsByDay[dayId]
+    const dayDoc = doc(db, 'conferences', id, 'days', dayId);
+    const sessionsRef = collection(dayDoc, 'sessions');
+    const sessionsList = sessionsByDay[dayId];
 
     try {
       const newSession = {
         ...sessionData,
         startTime: sessionData.startTime,
         endTime: sessionData.endTime,
-      }
-      const isConflict = checkForConflicts(sessionsList, newSession)
+      };
+      const isConflict = checkForConflicts(sessionsList, newSession);
 
       if (!isConflict) {
         await addDoc(sessionsRef, {
           ...newSession,
         });
         setSessionData({
-          title: "",
+          title: '',
           startTime: null,
           endTime: null,
-          description: "",
-          location: "",
+          description: '',
+          location: '',
           chairPersons: [],
           papers: [],
           presenters: [],
@@ -229,7 +248,7 @@ const ConferenceDetail = () => {
         setSelectedDayId(null);
       }
     } catch (err) {
-      console.error("Error adding session:", err);
+      console.error('Error adding session:', err);
     }
   };
 
@@ -237,16 +256,16 @@ const ConferenceDetail = () => {
     try {
       const sessionDoc = doc(
         db,
-        "conferences",
+        'conferences',
         id,
-        "days",
+        'days',
         dayId,
-        "sessions",
+        'sessions',
         sessionId
       );
       await deleteDoc(sessionDoc);
     } catch (err) {
-      console.error("Error deleting session:", err);
+      console.error('Error deleting session:', err);
     }
   };
 
@@ -254,11 +273,11 @@ const ConferenceDetail = () => {
     try {
       const sessionDoc = doc(
         db,
-        "conferences",
+        'conferences',
         id,
-        "days",
+        'days',
         dayId,
-        "sessions",
+        'sessions',
         sessionId
       );
 
@@ -269,18 +288,18 @@ const ConferenceDetail = () => {
       });
       setEditSessionId(null);
       setSessionData({
-        title: "",
+        title: '',
         startTime: null,
         endTime: null,
-        description: "",
-        location: "",
+        description: '',
+        location: '',
         chairPersons: [],
         papers: [],
         presenters: [],
         isBreak: false,
       });
     } catch (err) {
-      console.error("Error editing session:", err);
+      console.error('Error editing session:', err);
     }
   };
 
@@ -295,13 +314,15 @@ const ConferenceDetail = () => {
 
       // Check for time overlap
       const isOverlapping =
-        (newStartTime < existingEndTime && newEndTime > existingStartTime);
+        newStartTime < existingEndTime && newEndTime > existingStartTime;
 
       if (isOverlapping) {
         // Check for presenter overlap
         for (const presenter of session.presenters) {
           if (newPresenters.has(presenter)) {
-            alert(`Conflict Detected: Presenter ${presenter} is pre-occupied with another session at this time.`)
+            alert(
+              `Conflict Detected: Presenter ${presenter} is pre-occupied with another session at this time.`
+            );
             return true; // Conflict found
           }
         }
@@ -344,12 +365,11 @@ const ConferenceDetail = () => {
             <div>
               <p className="flex items-center gap-3">
                 <FiCalendar className="h-5 w-5 mr-2" />
-                {epochToDate(conference.startDate.seconds)}{" "}
-                <span> - </span>
-                {epochToDate(conference.endDate.seconds)}{" "}
+                {epochToDate(conference.startDate.seconds)} <span> - </span>
+                {epochToDate(conference.endDate.seconds)}{' '}
               </p>
             </div>
-        </div>
+          </div>
         </div>
 
         {/* Main Content */}
@@ -380,20 +400,29 @@ const ConferenceDetail = () => {
                   setEditSessionId={setEditSessionId}
                   setSessionData={setSessionData}
                   persons={persons}
+                  openModal={openModal}
                 />
 
-                {selectedDayId === day.id && (
-                  <div className="mt-4 ml-4 border-l-4 border-blue-500 pl-4">
-                    <SessionForm
-                      sessionData={sessionData}
-                      setSessionData={setSessionData}
-                      handleAddSession={handleAddSession}
-                      handleEditSession={handleEditSession}
-                      dayId={day.id}
-                      editSessionId={editSessionId}
-                      persons={persons}
-                      papers={papers}
-                    />
+                {isModalVisible && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="relative w-full max-w-lg mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+                      <button
+                        className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+                        onClick={closeModal}
+                      >
+                        ×
+                      </button>
+                      <SessionForm
+                        sessionData={sessionData}
+                        setSessionData={setSessionData}
+                        handleAddSession={handleAddSession}
+                        handleEditSession={handleEditSession}
+                        dayId={selectedDayId}
+                        editSessionId={editSessionId}
+                        persons={persons}
+                        papers={papers}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
