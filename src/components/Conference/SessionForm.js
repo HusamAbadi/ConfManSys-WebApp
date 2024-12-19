@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { Timestamp } from "firebase/firestore";
-import { FaPen } from "react-icons/fa";
-import { epochToDate, epochToDatetimeLocal } from "../../utils/epochConverter";
+import React, { useState } from 'react';
+import { Timestamp } from 'firebase/firestore';
+import { FaPen } from 'react-icons/fa';
+import { epochToDate, epochToDatetimeLocal } from '../../utils/epochConverter';
 
 const SessionForm = ({
   sessionData,
@@ -13,9 +13,9 @@ const SessionForm = ({
   persons,
   papers,
 }) => {
-  const [presenterSearch, setPresenterSearch] = useState("");
-  const [chairPersonSearch, setChairPersonSearch] = useState("");
-  const [paperSearch, setPaperSearch] = useState("");
+  const [presenterSearch, setPresenterSearch] = useState('');
+  const [chairPersonSearch, setChairPersonSearch] = useState('');
+  const [paperSearch, setPaperSearch] = useState('');
   const [errors, setErrors] = useState({});
 
   // Filter persons and papers based on search inputs
@@ -54,29 +54,29 @@ const SessionForm = ({
 
   const validateForm = () => {
     const newErrors = {};
-    if (!sessionData.title || sessionData.title.trim() === "") {
-      newErrors.title = "Title is required.";
+    if (!sessionData.title || sessionData.title.trim() === '') {
+      newErrors.title = 'Title is required.';
     }
     if (!sessionData.startTime) {
-      newErrors.startTime = "Start date and time are required.";
+      newErrors.startTime = 'Start date and time are required.';
     }
     if (!sessionData.endTime) {
-      newErrors.endTime = "End date and time are required.";
+      newErrors.endTime = 'End date and time are required.';
     }
     if (
       sessionData.startTime &&
       sessionData.endTime &&
       sessionData.startTime.toDate() >= sessionData.endTime.toDate()
     ) {
-      newErrors.time = "End time must be after start time.";
+      newErrors.time = 'End time must be after start time.';
     }
 
     if (!sessionData.isBreak) {
       if (!sessionData.presenters || sessionData.presenters.length === 0) {
-        newErrors.presenters = "At least one presenter is required.";
+        newErrors.presenters = 'At least one presenter is required.';
       }
       if (!sessionData.chairPersons || sessionData.chairPersons.length === 0) {
-        newErrors.chairPersons = "At least one chairperson is required.";
+        newErrors.chairPersons = 'At least one chairperson is required.';
       }
     }
 
@@ -98,7 +98,7 @@ const SessionForm = ({
     <div className="mt-4 p-20 py-12 w-fit border rounded-lg shadow-lg bg-white flex flex-col items-center">
       <div className="w-fit">
         <h3 className="text-xl font-bold text-blue-500 pb-10">
-          {editSessionId ? "Edit Session" : "Add New Session"}
+          {editSessionId ? 'Edit Session' : 'Add New Session'}
         </h3>
         <div className="mb-8 border-b border-gray-900/10 py-4 border-t">
           <label className="flex items-center text-gray-700 mb-2">
@@ -106,7 +106,16 @@ const SessionForm = ({
               type="checkbox"
               checked={sessionData.isBreak}
               onChange={(e) =>
-                setSessionData({ ...sessionData, isBreak: e.target.checked, title: "Break" })
+                setSessionData({
+                  ...sessionData,
+                  isBreak: e.target.checked,
+                  title: e.target.checked ? 'Break' : '', // Default title for break session
+                  presenters: e.target.checked ? [] : sessionData.presenters,
+                  chairPersons: e.target.checked
+                    ? []
+                    : sessionData.chairPersons,
+                  papers: e.target.checked ? [] : sessionData.papers,
+                })
               }
               className="mr-2"
             />
@@ -121,25 +130,23 @@ const SessionForm = ({
           </label>
           <input
             type="text"
-
             value={sessionData.title}
             onChange={(e) =>
               setSessionData({ ...sessionData, title: e.target.value })
             }
             className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-blue-500 sm:text-sm/6"
           />
-          {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+          {errors.title && (
+            <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+          )}
         </div>
 
-
-        {!sessionData.isBreak
-          &&
+        {!sessionData.isBreak && (
           <div className="mb-4">
             <label className="block text-gray-700 font-medium mb-2">
               Description
             </label>
             <textarea
-
               value={sessionData.description}
               onChange={(e) =>
                 setSessionData({ ...sessionData, description: e.target.value })
@@ -147,7 +154,7 @@ const SessionForm = ({
               className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-blue-500 sm:text-sm/6"
             />
           </div>
-        }
+        )}
         <div className="flex gap-2">
           {/* Start Time */}
           <div className="mb-4">
@@ -159,10 +166,12 @@ const SessionForm = ({
               value={
                 sessionData.startTime
                   ? epochToDatetimeLocal(sessionData.startTime.seconds)
-                  : ""
+                  : ''
               }
               onChange={(e) => {
-                const newStartTime = Timestamp.fromDate(new Date(e.target.value));
+                const newStartTime = Timestamp.fromDate(
+                  new Date(e.target.value)
+                );
                 setSessionData({
                   ...sessionData,
                   startTime: newStartTime,
@@ -198,7 +207,7 @@ const SessionForm = ({
               value={
                 sessionData.endTime
                   ? epochToDatetimeLocal(sessionData.endTime.seconds)
-                  : ""
+                  : ''
               }
               min={
                 sessionData.startTime
@@ -213,7 +222,7 @@ const SessionForm = ({
                 ) {
                   setErrors({
                     ...errors,
-                    endTime: "End time must be after start time.",
+                    endTime: 'End time must be after start time.',
                   });
                 } else {
                   setErrors({ ...errors, endTime: null });
@@ -230,8 +239,8 @@ const SessionForm = ({
             )}
           </div>
         </div>
-        {!sessionData.isBreak
-          && <>
+        {!sessionData.isBreak && (
+          <>
             {/* Presenters Search and Selection */}
             <div className="relative mb-4 border-t border-gray-900/10 pt-8 mt-8">
               <label className="block text-gray-700 font-medium mb-2">
@@ -239,12 +248,13 @@ const SessionForm = ({
               </label>
               <input
                 type="text"
-
                 value={presenterSearch}
                 onChange={(e) => setPresenterSearch(e.target.value)}
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-blue-500 sm:text-sm/6"
               />
-              {errors.presenters && <p className="text-red-500 text-sm mt-1">{errors.presenters}</p>}
+              {errors.presenters && (
+                <p className="text-red-500 text-sm mt-1">{errors.presenters}</p>
+              )}
               {presenterSearch && (
                 <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded shadow max-h-48 overflow-y-auto">
                   {filteredPresenters.map((person) => (
@@ -257,7 +267,7 @@ const SessionForm = ({
                             presenters: [...sessionData.presenters, person.id],
                           });
                         }
-                        setPresenterSearch("");
+                        setPresenterSearch('');
                       }}
                       className="p-2 hover:bg-gray-100 cursor-pointer"
                     >
@@ -277,7 +287,7 @@ const SessionForm = ({
                     key={presenterId}
                     className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm flex items-center"
                   >
-                    {presenter?.name || "Unknown"}
+                    {presenter?.name || 'Unknown'}
                     <button
                       onClick={() => handleRemovePresenter(presenterId)}
                       className="ml-2 text-red-500"
@@ -296,12 +306,15 @@ const SessionForm = ({
               </label>
               <input
                 type="text"
-
                 value={chairPersonSearch}
                 onChange={(e) => setChairPersonSearch(e.target.value)}
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-blue-500 sm:text-sm/6"
               />
-              {errors.chairPersons && <p className="text-red-500 text-sm mt-1">{errors.chairPersons}</p>}
+              {errors.chairPersons && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.chairPersons}
+                </p>
+              )}
               {chairPersonSearch && (
                 <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded shadow max-h-48 overflow-y-auto">
                   {filteredChairPersons.map((person) => (
@@ -311,10 +324,13 @@ const SessionForm = ({
                         if (!sessionData.chairPersons.includes(person.id)) {
                           setSessionData({
                             ...sessionData,
-                            chairPersons: [...sessionData.chairPersons, person.id],
+                            chairPersons: [
+                              ...sessionData.chairPersons,
+                              person.id,
+                            ],
                           });
                         }
-                        setChairPersonSearch("");
+                        setChairPersonSearch('');
                       }}
                       className="p-2 hover:bg-gray-100 cursor-pointer"
                     >
@@ -334,7 +350,7 @@ const SessionForm = ({
                     key={chairPersonId}
                     className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-sm flex items-center"
                   >
-                    {chairPerson?.name || "Unknown"}
+                    {chairPerson?.name || 'Unknown'}
                     <button
                       onClick={() => handleRemoveChairPerson(chairPersonId)}
                       className="ml-2 text-red-500"
@@ -353,7 +369,6 @@ const SessionForm = ({
               </label>
               <input
                 type="text"
-
                 value={paperSearch}
                 onChange={(e) => setPaperSearch(e.target.value)}
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-blue-500 sm:text-sm/6"
@@ -370,7 +385,7 @@ const SessionForm = ({
                             papers: [...sessionData.papers, paper.id],
                           });
                         }
-                        setPaperSearch("");
+                        setPaperSearch('');
                       }}
                       className="p-2 hover:bg-gray-100 cursor-pointer"
                     >
@@ -390,7 +405,7 @@ const SessionForm = ({
                     key={paperId}
                     className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-sm flex items-center"
                   >
-                    {paper?.title || "Unknown"}
+                    {paper?.title || 'Unknown'}
                     <button
                       onClick={() => handleRemovePaper(paperId)}
                       className="ml-2 text-red-500"
@@ -401,19 +416,19 @@ const SessionForm = ({
                 );
               })}
             </div>
-
-          </>}
+          </>
+        )}
         <button
           onClick={handleSubmit}
           className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
         >
           <div className="flex gap-2 justify-center align-center text-center">
             <FaPen />
-            {editSessionId ? "Save Session" : "Add Session"}
+            {editSessionId ? 'Save Session' : 'Add Session'}
           </div>
         </button>
       </div>
-    </div >
+    </div>
   );
 };
 

@@ -220,20 +220,20 @@ const ConferenceDetail = () => {
   const handleAddSession = async (dayId) => {
     const dayDoc = doc(db, 'conferences', id, 'days', dayId);
     const sessionsRef = collection(dayDoc, 'sessions');
-    const sessionsList = sessionsByDay[dayId];
+    const sessionsList = sessionsByDay[dayId] || []; // Ensure sessionsByDay[dayId] is always an array
 
     try {
       const newSession = {
         ...sessionData,
-        startTime: sessionData.startTime,
-        endTime: sessionData.endTime,
+        presenters: sessionData.presenters || [], // Default to an empty array
+        chairPersons: sessionData.chairPersons || [], // Default to an empty array
+        papers: sessionData.papers || [], // Default to an empty array
       };
+
       const isConflict = checkForConflicts(sessionsList, newSession);
 
       if (!isConflict) {
-        await addDoc(sessionsRef, {
-          ...newSession,
-        });
+        await addDoc(sessionsRef, newSession);
         setSessionData({
           title: '',
           startTime: null,
@@ -304,26 +304,28 @@ const ConferenceDetail = () => {
   };
 
   function checkForConflicts(existingSessions, newSession) {
-    const newStartTime = newSession.startTime.seconds;
-    const newEndTime = newSession.endTime.seconds;
-    const newPresenters = new Set(newSession.presenters);
+    const newStartTime = newSession.startTime?.seconds || 0;
+    const newEndTime = newSession.endTime?.seconds || 0;
+    const newPresenters = new Set(newSession.presenters || []);
 
     for (const session of existingSessions) {
-      const existingStartTime = session.startTime.seconds;
-      const existingEndTime = session.endTime.seconds;
+      const existingStartTime = session.startTime?.seconds || 0;
+      const existingEndTime = session.endTime?.seconds || 0;
 
       // Check for time overlap
       const isOverlapping =
         newStartTime < existingEndTime && newEndTime > existingStartTime;
 
       if (isOverlapping) {
-        // Check for presenter overlap
-        for (const presenter of session.presenters) {
-          if (newPresenters.has(presenter)) {
-            alert(
-              `Conflict Detected: Presenter ${presenter} is pre-occupied with another session at this time.`
-            );
-            return true; // Conflict found
+        // Check for presenter overlap only if not a break session
+        if (!newSession.isBreak && !session.isBreak) {
+          for (const presenter of session.presenters || []) {
+            if (newPresenters.has(presenter)) {
+              alert(
+                `Conflict Detected: Presenter ${presenter} is pre-occupied with another session at this time.`
+              );
+              return true; // Conflict found
+            }
           }
         }
       }
