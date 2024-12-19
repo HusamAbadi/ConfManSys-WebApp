@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import useFetchData from "../hooks/useFetchData";
-import ConferenceList from "../components/Conference/ConferenceList";
-import { db } from "../firebase/config";
+import React, { useState } from 'react';
+import useFetchData from '../hooks/useFetchData';
+import ConferenceList from '../components/Conference/ConferenceList';
+import { db } from '../firebase/config';
 import {
   collection,
   addDoc,
@@ -9,36 +9,36 @@ import {
   deleteDoc,
   doc,
   Timestamp,
-} from "firebase/firestore";
+} from 'firebase/firestore';
 import {
   Tabs,
   TabList,
   Tab,
   TabPanels,
   TabPanel,
-} from "../components/Shared/Tabs";
-import { Link } from "react-router-dom";
-import { FaCalendarAlt, FaListAlt } from "react-icons/fa";
-import BackgroundEventsCalendar from "../components/Conference/Calendar";
+} from '../components/Shared/Tabs';
+import { Link } from 'react-router-dom';
+import { FaCalendarAlt, FaListAlt } from 'react-icons/fa';
+import BackgroundEventsCalendar from '../components/Conference/Calendar';
 
 const ConferencesPage = () => {
   const {
     data: conferences,
     loading: conferencesLoading,
     error: conferencesError,
-  } = useFetchData("conferences");
-  console.log(conferences)
+  } = useFetchData('conferences');
+  console.log(conferences);
 
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [location, setLocation] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState('');
   const [editingConferenceId, setEditingConferenceId] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleAddOrUpdateConference = async () => {
     // Basic validation
@@ -49,12 +49,12 @@ const ConferencesPage = () => {
       !startDate ||
       !endDate
     ) {
-      setSubmitError("Please fill in all fields.");
+      setSubmitError('Please fill in all fields.');
       return;
     }
 
     if (new Date(startDate) >= new Date(endDate)) {
-      setSubmitError("End date must be after the start date.");
+      setSubmitError('End date must be after the start date.');
       return;
     }
 
@@ -72,25 +72,50 @@ const ConferencesPage = () => {
         updatedAt: Timestamp.now(),
       };
 
+      let conferenceId;
+
       if (editingConferenceId) {
-        const conferenceRef = doc(db, "conferences", editingConferenceId);
+        const conferenceRef = doc(db, 'conferences', editingConferenceId);
         await updateDoc(conferenceRef, {
           ...newConference,
           updatedAt: Timestamp.now(),
         });
-        setSuccessMessage("Conference updated successfully!");
+        conferenceId = editingConferenceId;
+        setSuccessMessage('Conference updated successfully!');
       } else {
         const docRef = await addDoc(
-          collection(db, "conferences"),
+          collection(db, 'conferences'),
           newConference
         );
-        setSuccessMessage("Conference added successfully!");
-        console.log("Conference added successfully with ID:", docRef.id);
+        conferenceId = docRef.id;
+        setSuccessMessage('Conference added successfully!');
+
+        // Automatically create days for the conference
+        const daysRef = collection(db, 'conferences', conferenceId, 'days');
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        for (
+          let current = new Date(start);
+          current <= end;
+          current.setDate(current.getDate() + 1)
+        ) {
+          const dayStart = new Date(current);
+          dayStart.setHours(9, 0, 0); // 9:00 AM
+          const dayEnd = new Date(current);
+          dayEnd.setHours(17, 0, 0); // 5:00 PM
+
+          await addDoc(daysRef, {
+            startDate: Timestamp.fromDate(dayStart),
+            endDate: Timestamp.fromDate(dayEnd),
+            createdAt: Timestamp.now(),
+          });
+        }
       }
 
       resetForm();
     } catch (error) {
-      console.error("Error adding/updating conference:", error);
+      console.error('Error adding/updating conference:', error);
       setSubmitError(error.message);
     } finally {
       setIsSubmitting(false);
@@ -108,27 +133,27 @@ const ConferencesPage = () => {
 
   const handleDeleteConference = async (conferenceId) => {
     setSubmitError(null);
-    setSuccessMessage("");
+    setSuccessMessage('');
 
     try {
-      const conferenceRef = doc(db, "conferences", conferenceId);
+      const conferenceRef = doc(db, 'conferences', conferenceId);
       await deleteDoc(conferenceRef);
-      setSuccessMessage("Conference deleted successfully!");
+      setSuccessMessage('Conference deleted successfully!');
       setTimeout(() => {
-        setSuccessMessage("");
+        setSuccessMessage('');
       }, 3000);
     } catch (error) {
-      console.error("Error deleting conference:", error);
+      console.error('Error deleting conference:', error);
       setSubmitError(error.message);
     }
   };
 
   const resetForm = () => {
-    setName("");
-    setDescription("");
-    setLocation("");
-    setStartDate("");
-    setEndDate("");
+    setName('');
+    setDescription('');
+    setLocation('');
+    setStartDate('');
+    setEndDate('');
     setEditingConferenceId(null);
   };
 
@@ -196,13 +221,13 @@ const ConferencesPage = () => {
           onClick={handleAddOrUpdateConference}
           disabled={isSubmitting}
           className={`bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition-colors duration-200
-            ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+            ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           {isSubmitting
-            ? "Processing..."
+            ? 'Processing...'
             : editingConferenceId
-              ? "Update Conference"
-              : "Add Conference"}
+            ? 'Update Conference'
+            : 'Add Conference'}
         </button>
       </div>
       <input
@@ -213,11 +238,18 @@ const ConferencesPage = () => {
         className="w-full border border-gray-300 p-3 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
       />
 
-
       <Tabs>
         <TabList>
-          <Tab><p className="flex gap-2 justify-center"><FaListAlt /> List</p></Tab>
-          <Tab><p className="flex gap-2 justify-center"><FaCalendarAlt /> Calendar</p></Tab>
+          <Tab>
+            <p className="flex gap-2 justify-center">
+              <FaListAlt /> List
+            </p>
+          </Tab>
+          <Tab>
+            <p className="flex gap-2 justify-center">
+              <FaCalendarAlt /> Calendar
+            </p>
+          </Tab>
         </TabList>
         <TabPanels>
           <TabPanel>
@@ -232,7 +264,6 @@ const ConferencesPage = () => {
           </TabPanel>
         </TabPanels>
       </Tabs>
-
     </div>
   );
 };

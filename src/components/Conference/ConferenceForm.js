@@ -1,14 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addConference, updateConference } from '../../services/conferenceService';
-import { collection, addDoc, Timestamp, updateDoc, doc } from "firebase/firestore";
-import { db } from "../../firebase/config";
+import {
+  addConference,
+  updateConference,
+} from '../../services/conferenceService';
+import {
+  collection,
+  addDoc,
+  Timestamp,
+  updateDoc,
+  doc,
+} from 'firebase/firestore';
+import { db } from '../../firebase/config';
 
 const ConferenceForm = ({ conference = null }) => {
   const [name, setName] = useState(conference ? conference.name : '');
   const [startDate, setStartDate] = useState(
     conference && conference.startDate
-      ? new Date(conference.startDate.seconds * 1000).toISOString().split('T')[0]
+      ? new Date(conference.startDate.seconds * 1000)
+          .toISOString()
+          .split('T')[0]
       : ''
   );
   const [endDate, setEndDate] = useState(
@@ -23,10 +34,18 @@ const ConferenceForm = ({ conference = null }) => {
     if (conference) {
       setName(conference.name);
       if (conference.startDate) {
-        setStartDate(new Date(conference.startDate.seconds * 1000).toISOString().split('T')[0]);
+        setStartDate(
+          new Date(conference.startDate.seconds * 1000)
+            .toISOString()
+            .split('T')[0]
+        );
       }
       if (conference.endDate) {
-        setEndDate(new Date(conference.endDate.seconds * 1000).toISOString().split('T')[0]);
+        setEndDate(
+          new Date(conference.endDate.seconds * 1000)
+            .toISOString()
+            .split('T')[0]
+        );
       }
     }
   }, [conference]);
@@ -38,16 +57,48 @@ const ConferenceForm = ({ conference = null }) => {
     try {
       const conferenceData = {
         name,
-        startDate,
-        endDate,
+        startDate: Timestamp.fromDate(new Date(startDate)),
+        endDate: Timestamp.fromDate(new Date(endDate)),
       };
 
+      let conferenceId;
+
       if (conference) {
+        // Update existing conference
         await updateConference(conference.id, conferenceData);
+        conferenceId = conference.id;
       } else {
-        await addConference(conferenceData);
+        // Create new conference
+        const conferenceDocRef = await addDoc(
+          collection(db, 'conferences'),
+          conferenceData
+        );
+        conferenceId = conferenceDocRef.id;
+
+        // Automatically create days for the conference
+        const daysRef = collection(db, 'conferences', conferenceId, 'days');
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        for (
+          let current = new Date(start);
+          current <= end;
+          current.setDate(current.getDate() + 1)
+        ) {
+          const dayStart = new Date(current);
+          dayStart.setHours(9, 0, 0); // 9:00 AM
+          const dayEnd = new Date(current);
+          dayEnd.setHours(17, 0, 0); // 5:00 PM
+
+          await addDoc(daysRef, {
+            startDate: Timestamp.fromDate(dayStart),
+            endDate: Timestamp.fromDate(dayEnd),
+            createdAt: Timestamp.now(),
+          });
+        }
       }
-      navigate("/conferences");
+
+      navigate('/conferences');
     } catch (error) {
       console.error('Error saving conference: ', error);
       alert('Error saving conference. Please try again.');
@@ -57,7 +108,10 @@ const ConferenceForm = ({ conference = null }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md"
+    >
       <div className="mb-4">
         <label className="block text-gray-700 text-sm font-bold mb-2">
           Conference Name
@@ -101,12 +155,11 @@ const ConferenceForm = ({ conference = null }) => {
           disabled={isSubmitting}
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50"
         >
-          {isSubmitting 
-            ? 'Saving...' 
-            : conference 
-              ? 'Update Conference' 
-              : 'Create Conference'
-          }
+          {isSubmitting
+            ? 'Saving...'
+            : conference
+            ? 'Update Conference'
+            : 'Create Conference'}
         </button>
       </div>
     </form>
