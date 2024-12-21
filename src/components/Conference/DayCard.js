@@ -16,6 +16,7 @@ const DayCard = ({
   setSessionData,
   persons,
   openModal,
+  closeModal,
 }) => {
   const startDate = day.startDate
     ? new Date(day.startDate.seconds * 1000)
@@ -133,6 +134,7 @@ const DayCard = ({
           setSelectedDayId={setSelectedDayId}
           setSessionData={setSessionData}
           persons={persons}
+          openModal={openModal}
         />
       </div>
     </div>

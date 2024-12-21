@@ -12,6 +12,7 @@ const SessionForm = ({
   editSessionId,
   persons,
   papers,
+  closeModal,
 }) => {
   const [presenterSearch, setPresenterSearch] = useState('');
   const [chairPersonSearch, setChairPersonSearch] = useState('');
@@ -91,6 +92,7 @@ const SessionForm = ({
       } else {
         handleAddSession(dayId);
       }
+      closeModal();
     }
   };
 
@@ -100,6 +102,12 @@ const SessionForm = ({
         <h3 className="text-xl font-bold text-blue-500 pb-10">
           {editSessionId ? 'Edit Session' : 'Add New Session'}
         </h3>
+        <button
+          className="absolute top-20 right-3 text-gray-500 hover:text-gray-800"
+          onClick={closeModal}
+        >
+          <strong>X</strong>
+        </button>
         <div className="mb-8 border-b border-gray-900/10 py-4 border-t">
           <label className="flex items-center text-gray-700 mb-2">
             <input
