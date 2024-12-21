@@ -230,7 +230,7 @@ const ConferenceDetail = () => {
         papers: sessionData.papers || [], // Default to an empty array
       };
 
-      const isConflict = checkForConflicts(sessionsList, newSession);
+      const isConflict = checkForConflicts(sessionsList, newSession, db);
 
       if (!isConflict) {
         await addDoc(sessionsRef, newSession);
@@ -303,7 +303,7 @@ const ConferenceDetail = () => {
     }
   };
 
-  function checkForConflicts(existingSessions, newSession) {
+  async function checkForConflicts(existingSessions, newSession, db) {
     const newStartTime = newSession.startTime?.seconds || 0;
     const newEndTime = newSession.endTime?.seconds || 0;
     const newPresenters = new Set(newSession.presenters || []);
@@ -319,11 +319,29 @@ const ConferenceDetail = () => {
       if (isOverlapping) {
         // Check for presenter overlap only if not a break session
         if (!newSession.isBreak && !session.isBreak) {
-          for (const presenter of session.presenters || []) {
-            if (newPresenters.has(presenter)) {
-              alert(
-                `Conflict Detected: Presenter ${presenter} is pre-occupied with another session at this time.`
-              );
+          for (const presenterId of session.presenters || []) {
+            if (newPresenters.has(presenterId)) {
+              try {
+                // Fetch presenter details from Firestore
+                const presenterDocRef = doc(db, 'persons', presenterId);
+                const presenterDoc = await getDoc(presenterDocRef);
+
+                if (presenterDoc.exists()) {
+                  const presenterName = presenterDoc.data().name || 'Unknown';
+                  alert(
+                    `Conflict Detected: Presenter ${presenterName} is pre-occupied with another session at this time.`
+                  );
+                } else {
+                  console.warn(
+                    `Presenter document with ID ${presenterId} not found.`
+                  );
+                }
+              } catch (error) {
+                console.error(
+                  `Error fetching presenter details for ID ${presenterId}:`,
+                  error
+                );
+              }
               return true; // Conflict found
             }
           }
