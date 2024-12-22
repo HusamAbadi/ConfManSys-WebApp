@@ -120,6 +120,7 @@ const ConferencesPage = () => {
     } finally {
       setIsSubmitting(false);
     }
+    window.location.reload();
   };
 
   const handleEditConference = (conference) => {
@@ -142,6 +143,7 @@ const ConferencesPage = () => {
       setTimeout(() => {
         setSuccessMessage('');
       }, 3000);
+      window.location.reload();
     } catch (error) {
       console.error('Error deleting conference:', error);
       setSubmitError(error.message);
