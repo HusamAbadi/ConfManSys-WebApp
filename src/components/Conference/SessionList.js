@@ -1,13 +1,5 @@
-// components/conference/SessionList.jsx
 import React from 'react';
-import {
-  FiClock,
-  FiMapPin,
-  FiEdit,
-  FiTrash2,
-  FiPlus,
-  FiX,
-} from 'react-icons/fi';
+import { FiClock, FiMapPin, FiEdit, FiTrash2 } from 'react-icons/fi';
 import { epochToTime } from '../../utils/epochConverter';
 
 const SessionList = ({
@@ -90,6 +82,23 @@ const SessionList = ({
                         {session.chairPersons
                           .map((id) => getPersonName(id))
                           .join(', ')}
+                      </p>
+                    )}
+                  {!session.isBreak &&
+                    session.presenters &&
+                    session.presenters.length > 0 && (
+                      <p className="text-sm text-gray-600">
+                        Presenters:{' '}
+                        {session.presenters.map((id, index) => (
+                          <span
+                            key={`${id}-${index}`}
+                            style={{
+                              color: 'inherit',
+                            }}
+                          >
+                            -{getPersonName(id)}.
+                          </span>
+                        ))}
                       </p>
                     )}
                 </div>

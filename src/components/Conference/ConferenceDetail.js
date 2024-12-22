@@ -48,6 +48,8 @@ const ConferenceDetail = () => {
   const [paperSearch, setPaperSearch] = useState('');
   const [editDayId, setEditDayId] = useState(null);
   const [editSessionId, setEditSessionId] = useState(null);
+  const [conflictingPresenters, setConflictingPresenters] = useState([]);
+  const [conflictingChairPersons, setConflictingChairPersons] = useState([]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -220,33 +222,39 @@ const ConferenceDetail = () => {
   const handleAddSession = async (dayId) => {
     const dayDoc = doc(db, 'conferences', id, 'days', dayId);
     const sessionsRef = collection(dayDoc, 'sessions');
-    const sessionsList = sessionsByDay[dayId] || []; // Ensure sessionsByDay[dayId] is always an array
+    const sessionsList = sessionsByDay[dayId] || [];
 
     try {
       const newSession = {
         ...sessionData,
-        presenters: sessionData.presenters || [], // Default to an empty array
-        chairPersons: sessionData.chairPersons || [], // Default to an empty array
-        papers: sessionData.papers || [], // Default to an empty array
+        presenters: sessionData.presenters || [],
+        chairPersons: sessionData.chairPersons || [],
+        papers: sessionData.papers || [],
       };
 
-      const isConflict = checkForConflicts(sessionsList, newSession, db);
+      // Find conflicting presenters and chairpersons
+      const { conflictingPresenters, conflictingChairPersons } =
+        await findConflictingEntities(sessionsList, newSession, db);
 
-      if (!isConflict) {
-        await addDoc(sessionsRef, newSession);
-        setSessionData({
-          title: '',
-          startTime: null,
-          endTime: null,
-          description: '',
-          location: '',
-          chairPersons: [],
-          papers: [],
-          presenters: [],
-          isBreak: false,
-        });
-        setSelectedDayId(null);
-      }
+      setConflictingPresenters(conflictingPresenters);
+      setConflictingChairPersons(conflictingChairPersons);
+
+      // Add the session regardless of conflicts
+      await addDoc(sessionsRef, newSession);
+
+      // Reset form data
+      setSessionData({
+        title: '',
+        startTime: null,
+        endTime: null,
+        description: '',
+        location: '',
+        chairPersons: [],
+        papers: [],
+        presenters: [],
+        isBreak: false,
+      });
+      setSelectedDayId(null);
     } catch (err) {
       console.error('Error adding session:', err);
     }
@@ -302,6 +310,62 @@ const ConferenceDetail = () => {
       console.error('Error editing session:', err);
     }
   };
+  async function findConflictingEntities(existingSessions, newSession, db) {
+    const newStartTime = newSession.startTime?.seconds || 0;
+    const newEndTime = newSession.endTime?.seconds || 0;
+    const newPresenters = new Set(newSession.presenters || []);
+    const newChairPersons = new Set(newSession.chairPersons || []);
+
+    const conflictingPresenters = new Set();
+    const conflictingChairPersons = new Set();
+
+    for (const session of existingSessions) {
+      const existingStartTime = session.startTime?.seconds || 0;
+      const existingEndTime = session.endTime?.seconds || 0;
+
+      // Check for time overlap
+      const isOverlapping =
+        newStartTime < existingEndTime && newEndTime > existingStartTime;
+
+      if (isOverlapping && !newSession.isBreak && !session.isBreak) {
+        // Check presenter conflicts
+        for (const presenterId of session.presenters || []) {
+          if (newPresenters.has(presenterId)) {
+            conflictingPresenters.add(presenterId);
+          }
+        }
+
+        // Check chairperson conflicts
+        for (const chairId of session.chairPersons || []) {
+          if (newChairPersons.has(chairId)) {
+            conflictingChairPersons.add(chairId);
+          }
+        }
+      }
+    }
+
+    // Fetch conflicting names
+    const fetchNames = async (ids) => {
+      const names = [];
+      for (const id of ids) {
+        try {
+          const docRef = doc(db, 'persons', id);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            names.push({ id, name: docSnap.data().name || 'Unknown' });
+          }
+        } catch (err) {
+          console.error(`Error fetching details for ID ${id}:`, err);
+        }
+      }
+      return names;
+    };
+
+    return {
+      conflictingPresenters: await fetchNames(conflictingPresenters),
+      conflictingChairPersons: await fetchNames(conflictingChairPersons),
+    };
+  }
 
   async function checkForConflicts(existingSessions, newSession, db) {
     const newStartTime = newSession.startTime?.seconds || 0;
@@ -422,6 +486,8 @@ const ConferenceDetail = () => {
                   persons={persons}
                   openModal={openModal}
                   closeModal={closeModal}
+                  conflictingPresenters={conflictingPresenters}
+                  conflictingChairPersons={conflictingChairPersons}
                 />
 
                 {isModalVisible && (

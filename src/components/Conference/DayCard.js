@@ -17,6 +17,8 @@ const DayCard = ({
   persons,
   openModal,
   closeModal,
+  conflictingPresenters,
+  conflictingChairPersons,
 }) => {
   const startDate = day.startDate
     ? new Date(day.startDate.seconds * 1000)
@@ -135,6 +137,8 @@ const DayCard = ({
           setSessionData={setSessionData}
           persons={persons}
           openModal={openModal}
+          conflictingPresenters={conflictingPresenters || []}
+          conflictingChairPersons={conflictingChairPersons || []}
         />
       </div>
     </div>
