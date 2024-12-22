@@ -13,6 +13,8 @@ const SessionForm = ({
   persons,
   papers,
   closeModal,
+  setConflictingChairPersons,
+  setConflictingPresenters
 }) => {
   const [presenterSearch, setPresenterSearch] = useState('');
   const [chairPersonSearch, setChairPersonSearch] = useState('');
@@ -53,6 +55,43 @@ const SessionForm = ({
     });
   };
 
+  // Add conflict checking logic
+  const checkConflicts = () => {
+    const conflicts = {
+      presenters: [],
+      chairPersons: [],
+    };
+
+    sessionData.presenters.forEach((presenterId) => {
+      const person = persons.find((p) => p.id === presenterId);
+      if (sessionData.presenters.includes(presenterId) && person) {
+        conflicts.presenters.push(person.name);
+      }
+    });
+
+    sessionData.chairPersons.forEach((chairId) => {
+      const person = persons.find((p) => p.id === chairId);
+      if (sessionData.chairPersons.includes(chairId) && person) {
+        conflicts.chairPersons.push(person.name);
+      }
+    });
+
+    return conflicts;
+  };
+
+  // Call checkConflicts before adding session
+  const handleAddSessionWithConflictCheck = () => {
+    const conflicts = checkConflicts();
+    setConflictingPresenters(conflicts.presenters);
+    setConflictingChairPersons(conflicts.chairPersons);
+    
+    if (editSessionId) {
+      handleEditSession(dayId, editSessionId);
+    } else {
+      handleAddSession(dayId);
+    }
+  };
+
   const validateForm = () => {
     const newErrors = {};
     if (!sessionData.title || sessionData.title.trim() === '') {
@@ -71,7 +110,9 @@ const SessionForm = ({
     ) {
       newErrors.time = 'End time must be after start time.';
     }
-
+    if (!sessionData.location || sessionData.location.trim() === '') {
+      newErrors.location = 'Location is required.';
+    }
     if (!sessionData.isBreak) {
       if (!sessionData.presenters || sessionData.presenters.length === 0) {
         newErrors.presenters = 'At least one presenter is required.';
@@ -85,7 +126,8 @@ const SessionForm = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     if (validateForm()) {
       if (editSessionId) {
         handleEditSession(dayId, editSessionId);
@@ -93,11 +135,12 @@ const SessionForm = ({
         handleAddSession(dayId);
       }
       closeModal();
+      // window.location.reload();
     }
   };
 
   return (
-    <div className="mt-4 p-20 py-12 w-fit border rounded-lg shadow-lg bg-white flex flex-col items-center">
+    <form onSubmit={handleSubmit} className="mt-4 p-20 py-12 w-fit border rounded-lg shadow-lg bg-white flex flex-col items-center">
       <div className="w-fit">
         <h3 className="text-xl font-bold text-blue-500 pb-10">
           {editSessionId ? 'Edit Session' : 'Add New Session'}
@@ -163,6 +206,22 @@ const SessionForm = ({
             />
           </div>
         )}
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-2">
+            Location <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={sessionData.location || ''}
+            onChange={(e) =>
+              setSessionData({ ...sessionData, location: e.target.value })
+            }
+            className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-blue-500 sm:text-sm/6"
+          />
+          {errors.location && (
+            <p className="text-red-500 text-sm mt-1">{errors.location}</p>
+          )}
+        </div>
         <div className="flex gap-2">
           {/* Start Time */}
           <div className="mb-4">
@@ -427,7 +486,7 @@ const SessionForm = ({
           </>
         )}
         <button
-          onClick={handleSubmit}
+          type="submit"
           className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
         >
           <div className="flex gap-2 justify-center align-center text-center">
@@ -436,7 +495,7 @@ const SessionForm = ({
           </div>
         </button>
       </div>
-    </div>
+    </form>
   );
 };
 

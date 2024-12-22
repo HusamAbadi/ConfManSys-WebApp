@@ -220,10 +220,15 @@ const ConferenceDetail = () => {
   };
 
   const handleAddSession = async (dayId) => {
+    if (!dayId) {
+      console.error('No dayId provided to handleAddSession');
+      return;
+    }
+  
     const dayDoc = doc(db, 'conferences', id, 'days', dayId);
     const sessionsRef = collection(dayDoc, 'sessions');
     const sessionsList = sessionsByDay[dayId] || [];
-
+  
     try {
       const newSession = {
         ...sessionData,
@@ -231,17 +236,17 @@ const ConferenceDetail = () => {
         chairPersons: sessionData.chairPersons || [],
         papers: sessionData.papers || [],
       };
-
+  
       // Find conflicting presenters and chairpersons
       const { conflictingPresenters, conflictingChairPersons } =
         await findConflictingEntities(sessionsList, newSession, db);
-
+  
       setConflictingPresenters(conflictingPresenters);
       setConflictingChairPersons(conflictingChairPersons);
-
-      // Add the session regardless of conflicts
+  
+      // Add the session
       await addDoc(sessionsRef, newSession);
-
+  
       // Reset form data
       setSessionData({
         title: '',
@@ -255,28 +260,14 @@ const ConferenceDetail = () => {
         isBreak: false,
       });
       setSelectedDayId(null);
+      closeModal();
+      window.location.reload();
+      
     } catch (err) {
       console.error('Error adding session:', err);
     }
   };
-
-  const handleDeleteSession = async (dayId, sessionId) => {
-    try {
-      const sessionDoc = doc(
-        db,
-        'conferences',
-        id,
-        'days',
-        dayId,
-        'sessions',
-        sessionId
-      );
-      await deleteDoc(sessionDoc);
-    } catch (err) {
-      console.error('Error deleting session:', err);
-    }
-  };
-
+  
   const handleEditSession = async (dayId, sessionId) => {
     try {
       const sessionDoc = doc(
@@ -288,7 +279,7 @@ const ConferenceDetail = () => {
         'sessions',
         sessionId
       );
-
+  
       await updateDoc(sessionDoc, {
         ...sessionData,
         startTime: sessionData.startTime,
@@ -306,10 +297,63 @@ const ConferenceDetail = () => {
         presenters: [],
         isBreak: false,
       });
+      window.location.reload();
     } catch (err) {
       console.error('Error editing session:', err);
     }
   };
+  
+  const handleDeleteSession = async (dayId, sessionId) => {
+    try {
+      const sessionDoc = doc(
+        db,
+        'conferences',
+        id,
+        'days',
+        dayId,
+        'sessions',
+        sessionId
+      );
+      await deleteDoc(sessionDoc);
+      window.location.reload();
+    } catch (err) {
+      console.error('Error deleting session:', err);
+    }
+  };
+
+  // const handleEditSession = async (dayId, sessionId) => {
+  //   try {
+  //     const sessionDoc = doc(
+  //       db,
+  //       'conferences',
+  //       id,
+  //       'days',
+  //       dayId,
+  //       'sessions',
+  //       sessionId
+  //     );
+
+  //     await updateDoc(sessionDoc, {
+  //       ...sessionData,
+  //       startTime: sessionData.startTime,
+  //       endTime: sessionData.endTime,
+  //     });
+  //     setEditSessionId(null);
+  //     setSessionData({
+  //       title: '',
+  //       startTime: null,
+  //       endTime: null,
+  //       description: '',
+  //       location: '',
+  //       chairPersons: [],
+  //       papers: [],
+  //       presenters: [],
+  //       isBreak: false,
+  //     });
+  //   } catch (err) {
+  //     console.error('Error editing session:', err);
+  //   }
+  // };
   async function findConflictingEntities(existingSessions, newSession, db) {
     const newStartTime = newSession.startTime?.seconds || 0;
     const newEndTime = newSession.endTime?.seconds || 0;
@@ -509,6 +553,8 @@ const ConferenceDetail = () => {
                         persons={persons}
                         papers={papers}
                         closeModal={closeModal}
+                        setConflictingChairPersons={setConflictingChairPersons}
+                        setConflictingPresenters={setConflictingPresenters}
                       />
                     </div>
                   </div>
