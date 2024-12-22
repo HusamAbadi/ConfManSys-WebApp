@@ -284,48 +284,179 @@ const SessionForm = ({
 
     {!sessionData.isBreak && (
       <>
-        {/* Presenters */}
-        <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-1">
-            Presenters <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={presenterSearch}
-            onChange={(e) => setPresenterSearch(e.target.value)}
-            className="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-gray-900 border border-gray-300 focus:ring focus:ring-blue-500 focus:outline-none"
-          />
-          {errors.presenters && (
-            <p className="text-red-500 text-xs mt-1">{errors.presenters}</p>
-          )}
-        </div>
+{/* Presenters */}
+<div className="mb-4">
+  <label className="block text-gray-700 font-medium mb-1">
+    Presenters <span className="text-red-500">*</span>
+  </label>
+  <input
+    type="text"
+    value={presenterSearch}
+    onChange={(e) => setPresenterSearch(e.target.value)}
+    className="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-gray-900 border border-gray-300 focus:ring focus:ring-blue-500 focus:outline-none"
+    placeholder="Search presenters..."
+  />
+  {presenterSearch && (
+    <ul className="mt-2 border rounded-md bg-white max-h-40 overflow-y-auto">
+      {filteredPresenters.map((person) => (
+        <li
+          key={person.id}
+          className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+          onClick={() => {
+            setSessionData({
+              ...sessionData,
+              presenters: [...sessionData.presenters, person.id],
+            });
+            setPresenterSearch('');
+          }}
+        >
+          {person.name}
+        </li>
+      ))}
+    </ul>
+  )}
+  {/* Selected Presenters */}
+  {sessionData.presenters.length > 0 && (
+    <div className="mt-3">
+      <p className="text-sm font-medium text-gray-700">Selected Presenters:</p>
+      <ul className="mt-2">
+        {sessionData.presenters.map((id) => {
+          const person = persons.find((p) => p.id === id);
+          return (
+            <li key={id} className="flex items-center justify-between">
+              <span>{person?.name}</span>
+              <button
+                type="button"
+                className="text-red-500 text-xs hover:underline"
+                onClick={() => handleRemovePresenter(id)}
+              >
+                Remove
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  )}
+  {errors.presenters && (
+    <p className="text-red-500 text-xs mt-1">{errors.presenters}</p>
+  )}
+</div>
 
-        {/* Chair Persons */}
-        <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-1">
-            Chair Persons <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={chairPersonSearch}
-            onChange={(e) => setChairPersonSearch(e.target.value)}
-            className="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-gray-900 border border-gray-300 focus:ring focus:ring-blue-500 focus:outline-none"
-          />
-          {errors.chairPersons && (
-            <p className="text-red-500 text-xs mt-1">{errors.chairPersons}</p>
-          )}
-        </div>
+{/* Chair Persons */}
+<div className="mb-4">
+  <label className="block text-gray-700 font-medium mb-1">
+    Chair Persons <span className="text-red-500">*</span>
+  </label>
+  <input
+    type="text"
+    value={chairPersonSearch}
+    onChange={(e) => setChairPersonSearch(e.target.value)}
+    className="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-gray-900 border border-gray-300 focus:ring focus:ring-blue-500 focus:outline-none"
+    placeholder="Search chairpersons..."
+  />
+  {chairPersonSearch && (
+    <ul className="mt-2 border rounded-md bg-white max-h-40 overflow-y-auto">
+      {filteredChairPersons.map((person) => (
+        <li
+          key={person.id}
+          className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+          onClick={() => {
+            setSessionData({
+              ...sessionData,
+              chairPersons: [...sessionData.chairPersons, person.id],
+            });
+            setChairPersonSearch('');
+          }}
+        >
+          {person.name}
+        </li>
+      ))}
+    </ul>
+  )}
+  {/* Selected Chair Persons */}
+  {sessionData.chairPersons.length > 0 && (
+    <div className="mt-3">
+      <p className="text-sm font-medium text-gray-700">Selected Chair Persons:</p>
+      <ul className="mt-2">
+        {sessionData.chairPersons.map((id) => {
+          const person = persons.find((p) => p.id === id);
+          return (
+            <li key={id} className="flex items-center justify-between">
+              <span>{person?.name}</span>
+              <button
+                type="button"
+                className="text-red-500 text-xs hover:underline"
+                onClick={() => handleRemoveChairPerson(id)}
+              >
+                Remove
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  )}
+  {errors.chairPersons && (
+    <p className="text-red-500 text-xs mt-1">{errors.chairPersons}</p>
+  )}
+</div>
 
-        {/* Papers */}
-        <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-1">Papers</label>
-          <input
-            type="text"
-            value={paperSearch}
-            onChange={(e) => setPaperSearch(e.target.value)}
-            className="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-gray-900 border border-gray-300 focus:ring focus:ring-blue-500 focus:outline-none"
-          />
-        </div>
+{/* Papers */}
+<div className="mb-4">
+  <label className="block text-gray-700 font-medium mb-1">Papers</label>
+  <input
+    type="text"
+    value={paperSearch}
+    onChange={(e) => setPaperSearch(e.target.value)}
+    className="block w-full rounded-md bg-white px-3 py-1.5 text-sm text-gray-900 border border-gray-300 focus:ring focus:ring-blue-500 focus:outline-none"
+    placeholder="Search papers..."
+  />
+  {paperSearch && (
+    <ul className="mt-2 border rounded-md bg-white max-h-40 overflow-y-auto">
+      {filteredPapers.map((paper) => (
+        <li
+          key={paper.id}
+          className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+          onClick={() => {
+            setSessionData({
+              ...sessionData,
+              papers: [...sessionData.papers, paper.id],
+            });
+            setPaperSearch('');
+          }}
+        >
+          {paper.title}
+        </li>
+      ))}
+    </ul>
+  )}
+  {/* Selected Papers */}
+  {sessionData.papers.length > 0 && (
+    <div className="mt-3">
+      <p className="text-sm font-medium text-gray-700">Selected Papers:</p>
+      <ul className="mt-2">
+        {sessionData.papers.map((id) => {
+          const paper = papers.find((p) => p.id === id);
+          return (
+            <li key={id} className="flex items-center justify-between">
+              <span>{paper?.title}</span>
+              <button
+                type="button"
+                className="text-red-500 text-xs hover:underline"
+                onClick={() => handleRemovePaper(id)}
+              >
+                Remove
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  )}
+</div>
+
+
       </>
     )}
 
