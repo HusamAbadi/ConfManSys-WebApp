@@ -70,22 +70,23 @@ const ConferenceDetail = () => {
     });
   };
 
-  useEffect(() => {
-    const fetchConference = async () => {
-      try {
-        const docRef = doc(db, 'conferences', id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setConference({ id: docSnap.id, ...docSnap.data() });
-        } else {
-          setError('Conference not found');
-        }
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+  const fetchConference = async () => {
+    try {
+      const docRef = doc(db, 'conferences', id);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setConference({ id: docSnap.id, ...docSnap.data() });
+      } else {
+        setError('Conference not found');
       }
-    };
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
 
     fetchConference();
   }, [id]);
@@ -261,7 +262,8 @@ const ConferenceDetail = () => {
       });
       setSelectedDayId(null);
       closeModal();
-      window.location.reload();
+      
+      await fetchConference();
       
     } catch (err) {
       console.error('Error adding session:', err);
@@ -297,7 +299,7 @@ const ConferenceDetail = () => {
         presenters: [],
         isBreak: false,
       });
-      window.location.reload();
+      await fetchConference();
     } catch (err) {
       console.error('Error editing session:', err);
     }
@@ -315,7 +317,7 @@ const ConferenceDetail = () => {
         sessionId
       );
       await deleteDoc(sessionDoc);
-      window.location.reload();
+      await fetchConference();
     } catch (err) {
       console.error('Error deleting session:', err);
     }
