@@ -9,6 +9,8 @@ import {
   deleteDoc,
   doc,
   Timestamp,
+  getDocs,
+  query,
 } from 'firebase/firestore';
 import {
   Tabs,
@@ -75,13 +77,48 @@ const ConferencesPage = () => {
       let conferenceId;
 
       if (editingConferenceId) {
+        // Delete existing days for the conference
+        const daysRef = collection(db, 'conferences', editingConferenceId, 'days');
+        const daysQuery = query(daysRef);
+        const daysSnapshot = await getDocs(daysQuery);
+        
+        // Delete all existing days
+        const deleteDayPromises = daysSnapshot.docs.map(dayDoc => 
+          deleteDoc(doc(db, 'conferences', editingConferenceId, 'days', dayDoc.id))
+        );
+        await Promise.all(deleteDayPromises);
+
+        // Update the conference
         const conferenceRef = doc(db, 'conferences', editingConferenceId);
         await updateDoc(conferenceRef, {
           ...newConference,
           updatedAt: Timestamp.now(),
         });
         conferenceId = editingConferenceId;
-        setSuccessMessage('Conference updated successfully!');
+
+        // Generate new days for the updated date range
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        for (
+          let current = new Date(start);
+          current <= end;
+          current.setDate(current.getDate() + 1)
+        ) {
+          const dayStart = new Date(current);
+          dayStart.setHours(9, 0, 0, 0); // Set default start time to 9:00 AM
+
+          const dayEnd = new Date(current);
+          dayEnd.setHours(17, 0, 0, 0); // Set default end time to 5:00 PM
+
+          await addDoc(daysRef, {
+            startDate: Timestamp.fromDate(dayStart),
+            endDate: Timestamp.fromDate(dayEnd),
+            createdAt: Timestamp.now(),
+          });
+        }
+
+        setSuccessMessage('Conference and days updated successfully!');
       } else {
         const docRef = await addDoc(
           collection(db, 'conferences'),
