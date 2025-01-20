@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db } from "../firebase/config";
 
 const Reports = () => {
@@ -27,6 +27,16 @@ const Reports = () => {
 
     fetchReports();
   }, []);
+
+  const handleDelete = async (reportId) => {
+    try {
+      await deleteDoc(doc(db, 'reports', reportId));
+      setReports(reports.filter(report => report.id !== reportId));
+    } catch (err) {
+      console.error('Error deleting report:', err);
+      setError('Failed to delete report');
+    }
+  };
 
   if (loading) {
     return (
@@ -62,16 +72,14 @@ const Reports = () => {
                   Generated on: {new Date(report.date.seconds * 1000).toLocaleDateString()}
                 </p>
               )}
-              {report.downloadUrl && (
-                <a
-                  href={report.downloadUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              <div className="mt-4">
+                <button
+                  onClick={() => handleDelete(report.id)}
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
                 >
-                  Download Report
-                </a>
-              )}
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>
