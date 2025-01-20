@@ -12,6 +12,7 @@ const Navbar = () => {
     { to: "/papers", label: "Papers" },
     { to: "/authors", label: "Authors" },
     { to: "/keywords", label: "Keywords" },
+    { to: "/reports", label: "Reports" },
   ];
 
   const toggleTheme = () => {

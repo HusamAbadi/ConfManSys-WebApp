@@ -13,6 +13,7 @@ import Navbar from "./components/Shared/Navbar";
 import PaperDetail from "./components/Paper/PaperDetail";
 import KeywordsPage from "./pages/KeywordsPage";
 import PasscodeEntry from "./components/PasscodeEntry";
+import Reports from "./pages/Reports";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -53,6 +54,7 @@ const App = () => {
                     <Route path="/authors" element={<AuthorsPage />} />
                     {/* <Route path="/authors/:id" element={<AuthorDetail />} /> */}
                     <Route path="/keywords" element={<KeywordsPage />} />
+                    <Route path="/reports" element={<Reports />} />
                   </Routes>
                 </div>
               </>
