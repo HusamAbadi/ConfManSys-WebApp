@@ -13,13 +13,13 @@ import {
 
 const Login = () => {
   const [error, setError] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const username = 'admin';
-    const password = 'admin123';
-
+    
     try {
       // Convert username to email format as Firebase requires email
       const email = `${username}@admin.com`;
@@ -66,8 +66,8 @@ const Login = () => {
               label="Username"
               name="username"
               autoComplete="username"
-              value="admin"
-              disabled
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
             <TextField
               margin="normal"
@@ -78,8 +78,8 @@ const Login = () => {
               type="password"
               id="password"
               autoComplete="current-password"
-              value="admin123"
-              disabled
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
             {error && (
               <Typography color="error" sx={{ mt: 1 }}>
