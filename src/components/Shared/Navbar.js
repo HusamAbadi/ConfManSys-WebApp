@@ -1,8 +1,11 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Navbar = () => {
-  const location = useLocation(); // Get the current location
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [isDarkTheme, setIsDarkTheme] = useState(false); // State for theme toggle
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State for mobile menu toggle
 
@@ -14,6 +17,15 @@ const Navbar = () => {
     { to: "/keywords", label: "Keywords" },
     { to: "/reports", label: "Reports" },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
 
   const toggleTheme = () => {
     setIsDarkTheme((prev) => !prev);
@@ -29,6 +41,7 @@ const Navbar = () => {
     >
       <div className="container mx-auto flex justify-between items-center px-4 lg:px-0">
         <h1 className="text-lg font-bold">My Conference Management</h1>
+        
         {/* Mobile menu button */}
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -74,6 +87,16 @@ const Navbar = () => {
               </Link>
             </li>
           ))}
+          
+          {/* Logout Button */}
+          <li className="text-center lg:text-left">
+            <button
+              onClick={handleLogout}
+              className="block w-full lg:w-auto py-2 px-4 rounded transition duration-300 hover:bg-blue-500 text-white"
+            >
+              Logout
+            </button>
+          </li>
         </ul>
 
         {/* Theme Toggle Button */}
