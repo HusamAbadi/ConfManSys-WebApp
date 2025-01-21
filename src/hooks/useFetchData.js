@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { db } from "../firebase/config"; // Adjust the import as necessary
 import { collection, getDocs } from "firebase/firestore";
 
@@ -6,6 +6,11 @@ const useFetchData = (collectionName) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const refresh = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
 
   useEffect(() => {
     // Ensure collectionName is valid to prevent unnecessary fetch attempts
@@ -30,9 +35,9 @@ const useFetchData = (collectionName) => {
     };
 
     fetchData();
-  }, [collectionName]); // Only rerun if collectionName changes
+  }, [collectionName, refreshTrigger]); // Only rerun if collectionName or refreshTrigger changes
 
-  return { data, loading, error };
+  return { data, loading, error, refresh };
 };
 
 export default useFetchData;

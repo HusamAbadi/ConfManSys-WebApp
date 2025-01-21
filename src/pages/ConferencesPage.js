@@ -28,6 +28,7 @@ const ConferencesPage = () => {
     data: conferences,
     loading: conferencesLoading,
     error: conferencesError,
+    refresh: refreshConferences,
   } = useFetchData('conferences');
   console.log(conferences);
 
@@ -151,13 +152,13 @@ const ConferencesPage = () => {
       }
 
       resetForm();
+      refreshConferences();
     } catch (error) {
       console.error('Error adding/updating conference:', error);
       setSubmitError(error.message);
     } finally {
       setIsSubmitting(false);
     }
-    window.location.reload();
   };
 
   const handleEditConference = (conference) => {
@@ -180,7 +181,7 @@ const ConferencesPage = () => {
       setTimeout(() => {
         setSuccessMessage('');
       }, 3000);
-      window.location.reload();
+      refreshConferences();
     } catch (error) {
       console.error('Error deleting conference:', error);
       setSubmitError(error.message);
